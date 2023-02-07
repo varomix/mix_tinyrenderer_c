@@ -10,13 +10,11 @@
 typedef struct Model {
     vec3 *verts;
     vec3 *faces;
-    int   num_verts;
-    int   num_faces;
+    vec3 *tex_verts;
+    vec3 *nor_verts;
+    int num_verts;
+    int num_faces;
 } Model;
-
-int nverts();
-
-int nfaces();
 
 void parse_obj_file(const char *filename, Model *model);
 

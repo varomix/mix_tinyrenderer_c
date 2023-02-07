@@ -55,6 +55,12 @@ void swap_ivec3(ivec3 v1, ivec3 v2) {
     glm_ivec3_copy(temp, v2);
 }
 
+void glm_ivec3_scale_float(ivec3 v, float s, ivec3 dest) {
+    dest[0] = v[0] * s;
+    dest[1] = v[1] * s;
+    dest[2] = v[2] * s;
+}
+
 typedef struct {
     vec3 verts;
     vec3 faces;
@@ -115,18 +121,19 @@ void triangle(ivec3 t0, ivec3 t1, ivec3 t2, Image image, ColorRGB color, int *zb
 
         ivec3 A1, A2, A = GLM_IVEC3_ZERO_INIT;
         glm_ivec3_sub(t2, t0, A1);
-        glm_ivec3_scale(A1, alpha, A2);
+
+        glm_ivec3_scale_float(A1, alpha, A2);
         glm_ivec3_add(A2, t0, A);
 
         ivec3 B, B1, B2, BOP1, B11, B22, BOP2 = GLM_IVEC3_ZERO_INIT;
         // Vec3i B = second_half ? t1 + (t2-t1)*beta
         glm_ivec3_sub(t2, t1, B1);
-        glm_ivec3_scale(B1, beta, B2);
+        glm_ivec3_scale_float(B1, beta, B2);
         glm_ivec3_add(t1, B2, BOP1);
 
         //: t0 + (t1-t0)*beta;
         glm_ivec3_sub(t1, t0, B11);
-        glm_ivec3_scale(B11, beta, B22);
+        glm_ivec3_scale_float(B11, beta, B22);
         glm_ivec3_add(t0, B22, BOP2);
 
         if (second_half) {
@@ -139,7 +146,6 @@ void triangle(ivec3 t0, ivec3 t1, ivec3 t2, Image image, ColorRGB color, int *zb
         for (int j = A[0]; j <= B[0]; j++) {
             float phi = B[0] == A[0] ? 1.0 : (float) (j - A[0]) / (float) (B[0] - A[0]);
 
-            // C ++ version Vec3i P = A + (B-A)*phi;
             ivec3 P, P1, P2 = GLM_IVEC3_ZERO_INIT;
             glm_ivec3_sub(B, A, P1);
             glm_ivec3_scale(P1, phi, P2);
@@ -196,23 +202,24 @@ int main(void) {
 //        printf("zbuffer %d\n", zbuffer[i]);
     }
 
-    // for (int i = 0; i < model.num_faces; i++) {
-    //     vec3 face;
-    //     glm_vec3_copy(model.faces[i], face);
-    //     for (int j = 0; j < 3; j++) {
-    //         vec3 v0, v1;
-    //         glm_vec3_copy(model.verts[(int)face[j]], v0);
-    //         glm_vec3_copy(model.verts[(int)face[(j + 1) % 3]], v1);
-    //         int x0 = (v0[0] + 1.0) * (width - 1) / 2.0;
-    //         int y0 = (v0[1] + 1.0) * (height - 1) / 2.0;
-    //         int x1 = (v1[0] + 1.0) * (width - 1) / 2.0;
-    //         int y1 = (v1[1] + 1.0) * (height - 1) / 2.0;
+//    for (int i = 0; i < model.num_faces; i++) {
+//        vec3 face;
+//        glm_vec3_copy(model.faces[i], face);
+//        for (int j = 0; j < 3; j++) {
+//            vec3 v0, v1;
+//            glm_vec3_copy(model.verts[(int) face[j]], v0);
+//            glm_vec3_copy(model.verts[(int) face[(j + 1) % 3]], v1);
+//            int x0 = (v0[0] + 1.0) * (width - 1) / 2.0;
+//            int y0 = (v0[1] + 1.0) * (height - 1) / 2.0;
+//            int x1 = (v1[0] + 1.0) * (width - 1) / 2.0;
+//            int y1 = (v1[1] + 1.0) * (height - 1) / 2.0;
+//
+//            line(x0, y0, x1, y1, image, white);
+//        }
+//    }
 
-    //         line(x0, y0, x1, y1, image, white);
-    //     }
-    // }
-
-    for (int i = 0; i < model.num_faces - 1; i++) {
+    // Render with depth
+    for (int i = 0; i < model.num_faces; i++) {
         vec3 face = GLM_VEC3_ZERO_INIT;
         glm_vec3_copy(model.faces[i], face);
         ivec3 screen_coords[3] = GLM_IVEC3_ZERO_INIT;
@@ -244,7 +251,7 @@ int main(void) {
     }
 
     stbi__flip_vertically_on_write = 1;
-    stbi_write_png("output_chapter_03.png", width, height, num_channels, image.pixels, width * num_channels);
+    stbi_write_png("output_lesson_03.png", width, height, num_channels, image.pixels, width * num_channels);
 
     // dump z-buffer (debugging purposes only)
 
@@ -259,7 +266,7 @@ int main(void) {
     stbi__flip_vertically_on_write = 1;
     stbi_write_png("zdepth_chapter_03.png", width, height, num_channels, zbimage.pixels, width * num_channels);
 
-    // Free the memory
+//     Free the memory
     free(zbimage.pixels);
     free(image.pixels);
     free(model.verts);

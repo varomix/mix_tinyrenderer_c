@@ -14,6 +14,8 @@ void parse_obj_file(const char *filename, Model *model) {
 
     model->verts = malloc(2048 * sizeof(vec3));
     model->faces = malloc(4096 * sizeof(vec3));
+    model->tex_verts = malloc(4096 * sizeof(vec3));
+    model->nor_verts = malloc(4096 * sizeof(vec3));
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -22,13 +24,13 @@ void parse_obj_file(const char *filename, Model *model) {
     }
 
     char line[1024];
-    int  vi = 0;
-    int  fi = 0;
+    int vi = 0;
+    int fi = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'v' && line[1] == ' ') {
             // vertex line
             // printf("%s", line);
-            char  *token = strtok(line, " "); // skip the first token which would be v, f, vt
+            char *token = strtok(line, " "); // skip the first token which would be v, f, vt
             double x = atof(strtok(NULL, " "));
             double y = atof(strtok(NULL, " "));
             double z = atof(strtok(NULL, " "));
@@ -39,18 +41,39 @@ void parse_obj_file(const char *filename, Model *model) {
             vi++;
         } else if (line[0] == 'f' && line[1] == ' ') {
             // face line
-            // printf("line: %s", line);
+//            printf("line: %s", line);
             char *token = strtok(line, " "); // skip the first token which would be v, f, vt
-            char *x = strtok(NULL, " ");
-            char *y = strtok(NULL, " ");
-            char *z = strtok(NULL, " ");
-            // double y = atoi(strtok(NULL, " "));
-            // double z = atoi(strtok(NULL, " "));
-            // printf("x: %c y: %c z: %c\n", *x, *y, *z);
-            model->faces[fi][0] = atoi(x) - 1;
-            model->faces[fi][1] = atoi(y) - 1;
-            model->faces[fi][2] = atoi(z) - 1;
-            // ++model->num_verts;
+            char *token_1 = strtok(NULL, " ");
+            char *token_2 = strtok(NULL, " ");
+            char *token_3 = strtok(NULL, " ");
+
+            // parse first vertex
+            char *vertex_index = strtok(token_1, "/");
+            char *vertex_texture = strtok(NULL, "/");
+            char *vertex_normal = strtok(NULL, "/");
+
+            model->faces[fi][0] = atoi(vertex_index) - 1;
+            model->tex_verts[fi][0] = atoi(vertex_texture) - 1;
+            model->nor_verts[fi][0] = atoi(vertex_normal) - 1;
+
+            // parse second vertex
+            vertex_index = strtok(token_2, "/");
+            vertex_texture = strtok(NULL, "/");
+            vertex_normal = strtok(NULL, "/");
+
+            model->faces[fi][1] = atoi(vertex_index) - 1;
+            model->tex_verts[fi][1] = atoi(vertex_texture) - 1;
+            model->nor_verts[fi][1] = atoi(vertex_normal) - 1;
+
+            // parse third vertex
+            vertex_index = strtok(token_3, "/");
+            vertex_texture = strtok(NULL, "/");
+            vertex_normal = strtok(NULL, "/");
+
+            model->faces[fi][2] = atoi(vertex_index) - 1;
+            model->tex_verts[fi][2] = atoi(vertex_texture) - 1;
+            model->nor_verts[fi][2] = atoi(vertex_normal) - 1;
+
             fi++;
             ++model->num_faces;
         }

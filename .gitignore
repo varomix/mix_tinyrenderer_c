@@ -1,5 +1,6 @@
 # Project exclude paths
 /cmake-build-debug/
-.idea
-.cache
+/.idea
+/.cache
 /build
+/WIP_pics
